@@ -1,8 +1,4 @@
-FROM frolvlad/alpine-glibc:alpine-3.6
-
-ARG work_dir=/tmp/setup
-RUN mkdir ${work_dir} && \
-    chmod 777 ${work_dir}
+FROM golang:1.12.7-alpine3.10
 
 WORKDIR /root
 
@@ -15,19 +11,6 @@ RUN apk add --no-cache ca-certificates wget openssh git && \
 
 ARG dev_dir=/root/work
 RUN mkdir ${dev_dir}
-
-# --- install go --- #
-
-ARG go_tar=go1.10.3.linux-amd64.tar.gz
-
-RUN wget https://dl.google.com/go/${go_tar} && \
-    tar zxf ${go_tar} && \
-    rm ${go_tar} && \
-    mv go /usr/local && \
-    mkdir /root/go
-
-ENV PATH /usr/local/go/bin:${PATH}
-ENV GOPATH /root/go
 
 # --- install emacs --- #
 
