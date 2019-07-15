@@ -14,7 +14,7 @@ $ docker run -v <a host folder>:/root/work -it eshamster/go-devel /bin/sh
 This mainly consists of ...
 
 - Based on Alpine Linux
-- Emacs 25
+- Emacs 26.2
 
 ---------
 
