@@ -3,8 +3,17 @@
 ;; ----- Install packages ----- ;;
 
 (require 'package)
-(add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/") t)
+(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
 (package-initialize)
+
+;; FIXME:
+;; The reason is not revealed, but built-in packages are not recognized
+;; from the package manager. So I directly install such required packages.
+;; For that, the el files should be downloaded before installing.
+
+(dolist (pack-name '("jsonrpc" "flymake"))
+  (package-install-file
+   (concat "~/.emacs.d/src/" pack-name ".el")))
 
 (defun install-packages (packages)
   (let ((refreshed nil))
@@ -80,25 +89,67 @@
 
 ;; ----- go settings ----- ;;
 
-(install-packages '(flycheck
-                    company-go))
+(install-packages '(go-mode
+                    eglot
+                    flycheck
+                    company
+                    exec-path-from-shell))
 
-(add-to-list 'exec-path (expand-file-name "/usr/local/go/bin/"))
-(add-to-list 'exec-path (expand-file-name "/root/go/bin/"))
+;; - company - ;;
 
-(require 'go-mode)
-(require 'company-go)
+(use-package company
+  :config
+  (global-company-mode)
+  (setq company-idle-delay 1)
+  (setq company-minimum-prefix-length 1)
+  (setq completion-ignore-case t)
+  (setq company-dabbrev-downcase nil)
+    (setq company-selection-wrap-around t))
 
-(add-hook 'go-mode-hook 'company-mode)
-(add-hook 'go-mode-hook 'flycheck-mode)
-(add-hook 'go-mode-hook (lambda()
-           (add-hook 'before-save-hook' 'gofmt-before-save)
-           (local-set-key (kbd "M-.") 'godef-jump)
-           (set (make-local-variable 'company-backends) '(company-go))
-           (company-mode)
-           (setq indent-tabs-mode nil)
-           (setq c-basic-offset 4)
-           (setq tab-width 4)))
+;; - eglot - ;;
+
+(use-package eglot
+  :bind
+  (("M-." . xref-find-definitions)
+   ("M-[" . xref-find-references))
+  :config
+  (add-to-list 'eglot-server-programs '(go-mode . ("gopls")))
+  :init
+  (add-hook 'js-mode-hook 'eglot-ensure)
+    (add-hook 'go-mode-hook 'eglot-ensure))
+
+;; - go - ;;
+
+(let ((envs '("GOROOT" "GOPATH")))
+  (exec-path-from-shell-copy-envs envs))
+
+(defun my-gofmt-hook ()
+  (unwind-protect
+      (progn
+        (remove-hook 'before-save-hook 'my-gofmt-hook)
+        (save-buffer)
+        (shell-command (concat "goimports -w " (buffer-file-name)))
+        (revert-buffer t t t))
+    (add-hook 'before-save-hook 'my-gofmt-hook)))
+
+;; FIXME:
+;; (setq gofmt-command "goimports")
+;; (add-hook 'before-save-hook 'gofmt-before-save)
+;;
+;; The above settings on ":config" is an ordinal solution.
+;; However, it got into the following error.
+;;   "Invalid rcs patch or internal error in go--apply-rcs-patch"
+;; So I created an original hook.
+
+(use-package go-mode
+  :commands go-mode
+  :defer t
+  :config
+  (add-hook 'before-save-hook 'my-gofmt-hook)
+  ;; The following is required to avoid wrong analysis by LSP server.
+  (add-hook 'after-save-hook
+            '(lambda ()
+               (revert-buffer t t t))))
 
 ;; ----- Other libraries ----- ;;
 
@@ -117,7 +168,9 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(magit-merge-arguments (quote ("--no-ff")))
- '(package-selected-packages (quote (wgrep smex w3m paredit markdown-mode magit))))
+ '(package-selected-packages
+   (quote
+    (flymake jsonrpc wgrep smex w3m paredit markdown-mode magit))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
