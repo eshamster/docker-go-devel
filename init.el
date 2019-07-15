@@ -3,17 +3,9 @@
 ;; ----- Install packages ----- ;;
 
 (require 'package)
+(add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/"))
 (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
 (package-initialize)
-
-;; FIXME:
-;; The reason is not revealed, but built-in packages are not recognized
-;; from the package manager. So I directly install such required packages.
-;; For that, the el files should be downloaded before installing.
-
-(dolist (pack-name '("jsonrpc" "flymake"))
-  (package-install-file
-   (concat "~/.emacs.d/src/" pack-name ".el")))
 
 (defun install-packages (packages)
   (let ((refreshed nil))
