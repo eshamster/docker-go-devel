@@ -1,4 +1,4 @@
-FROM golang:1.12.7-alpine3.10
+FROM golang:1.16.4-alpine3.13
 
 WORKDIR /root
 
@@ -24,8 +24,8 @@ RUN mkdir ${emacs_home} && \
     mkdir ${site_lisp} && \
     mkdir ${emacs_docs}
 
-RUN go get -u golang.org/x/tools/cmd/gopls && \
-    go get golang.org/x/tools/cmd/goimports
+RUN go install golang.org/x/tools/gopls@latest && \
+    go install golang.org/x/tools/cmd/goimports@latest
 
 COPY init.el ${emacs_home}
 RUN emacs --batch --load ${emacs_home}/init.el
