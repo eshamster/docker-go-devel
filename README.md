@@ -5,7 +5,7 @@ A Dockerfile to configure Go development environment with Emacs.
 ## Installation
 
 ```bash
-$ docker pull eshamster/go-devel
+$ docker pull eshamster/go-devel:latest
 $ docker run -v <a host folder>:/root/work -it eshamster/go-devel /bin/sh
 ```
 
@@ -13,8 +13,9 @@ $ docker run -v <a host folder>:/root/work -it eshamster/go-devel /bin/sh
 
 This mainly consists of ...
 
-- Based on Alpine Linux
-- Emacs 26.2
+- Go 1.16.4
+- Alpine Linux 3.13
+- Emacs 27.1
 
 ---------
 
